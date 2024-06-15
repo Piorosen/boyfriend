@@ -1,8 +1,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
-	"os"
+	"net/http"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -11,18 +12,19 @@ import (
 
 func main() {
 	godotenv.Load()
-	// BotFather로부터 받은 토큰을 환경 변수에서 읽어옵니다.
-	token := os.Getenv("TELEGRAM_BOT_API_TOKEN")
-	if token == "" {
-		log.Fatal("TELEGRAM_BOT_API_TOKEN 환경 변수를 설정해주세요.")
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	env, err := GetEnvironment()
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := NewClient()
+	err = client.Connect(env.PostgresIP, 5432, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
+	if err != nil {
+		log.Panic(err)
 	}
 
-	chat_id := os.Getenv("TELEGRAM_BOT_API_CHAT_ID")
-	if chat_id == "" {
-		log.Fatal("TELEGRAM_BOT_API_CHAT_ID 환경 변수를 설정해주세요.")
-	}
-
-	bot, err := tgbotapi.NewBotAPI(token)
+	bot, err := tgbotapi.NewBotAPI(env.TelegramBotToken)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -37,16 +39,30 @@ func main() {
 
 	for update := range updates {
 		receive_chat_id := strconv.FormatInt(update.Message.Chat.ID, 10)
-
-		if receive_chat_id == chat_id {
+		if receive_chat_id == env.TelegramChatId {
 			if update.Message != nil { // If we got a message
-				// if update.Id
 				log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-				msg.ReplyToMessageID = update.Message.MessageID
+				output := client.Process(update.Message.Text)
+				if output != "" {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
+					msg.ReplyToMessageID = update.Message.MessageID
+					bot.Send(msg)
+				} else if client.Run() {
+					err = client.Insert(update.Message.From.FirstName,
+						update.Message.From.LastName,
+						update.Message.From.UserName,
+						update.Message.Text,
+						int64(update.Message.MessageID),
+						update.Message.From.ID,
+					)
+					if err != nil {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+						msg.ReplyToMessageID = update.Message.MessageID
+						bot.Send(msg)
+					}
+				}
 
-				// bot.Send(msg)
 			}
 		} else {
 			log.Printf("Detect Hacker! [%s] %s", update.Message.From.UserName, update.Message.Text)
