@@ -55,3 +55,4 @@ tzdata==2024.1
 urllib3==2.2.1
 xxhash==3.4.1
 yarl==1.9.4
+accelerate==0.31.0
