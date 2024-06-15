@@ -16,6 +16,9 @@ FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
+LABEL org.opencontainers.image.source=https://github.com/Piorosen/boyfriend
+LABEL org.opencontainers.image.licenses=MIT
+LABEL org.opencontainers.image.authors="JooHyoung Cha"
 
 # Copy installed dependencies from the builder stage
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
