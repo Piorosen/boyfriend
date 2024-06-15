@@ -32,7 +32,7 @@ nvidia-nvjitlink-cu12==12.1.105
 nvidia-nvtx-cu12==12.1.105
 packaging==24.1
 pandas==2.2.2
-pillow==10.2.0
+pillow==10.3.0
 pyarrow==16.1.0
 pyarrow-hotfix==0.6
 python-dateutil==2.9.0.post0
