@@ -1,2 +1,3 @@
-# boyfriend-for-oMFDOo
-Smart AI boyfriend for girlfriend, Korean version
+# 마! 내가 너 남자친구다.
+
+
