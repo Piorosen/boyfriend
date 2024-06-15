@@ -98,7 +98,7 @@ func (client *Client) Count() []DBCount {
 				log.Fatalf("Error retrieving user: %v", result.Error)
 			}
 		}
-		
+
 		results = append(results, DBCount{
 			FirstName: search.FirstName,
 			LastName:  search.LastName,
@@ -133,7 +133,11 @@ func (client *Client) Process(text string) string {
 			for i, v := range data {
 				result += fmt.Sprintf("%d 등 | %d 회 : [%s, %s, %s]\n", i+1, v.Count, v.FirstName, v.LastName, v.UserName)
 			}
-			return result
+			if result == "" {
+				return "어떠한 데이터도 없습니다."
+			} else {
+				return result
+			}
 		default:
 			return ""
 		}
