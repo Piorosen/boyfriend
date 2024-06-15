@@ -18,8 +18,9 @@ services:
 
 
   telegram_bot:
-    build: 
-      context: '.'
+    image: ghcr.io/piorosen/colllection-telegram:1.0.0
+    # build: 
+      # context: '.'
     restart: unless-stopped
     environment:
       TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}
