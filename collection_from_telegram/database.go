@@ -98,6 +98,7 @@ func (client *Client) Count() []DBCount {
 				log.Fatalf("Error retrieving user: %v", result.Error)
 			}
 		}
+		
 		results = append(results, DBCount{
 			FirstName: search.FirstName,
 			LastName:  search.LastName,
