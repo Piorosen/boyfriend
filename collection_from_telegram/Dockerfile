@@ -14,5 +14,8 @@ WORKDIR /dist
 RUN cp /build/main .
 
 FROM scratch
+LABEL org.opencontainers.image.source=https://github.com/Piorosen/boyfriend
+LABEL org.opencontainers.image.licenses=MIT
+LABEL org.opencontainers.image.authors="JooHyoung Cha"
 COPY --from=builder /dist/main .
 ENTRYPOINT ["/main"]
