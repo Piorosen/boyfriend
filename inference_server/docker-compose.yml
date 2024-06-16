@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  tritonserver:
+  # https://docs.nvidia.com/deeplearning/triton-inference-server/release-notes/rel-23-10.html#rel-23-10
+  # my pc cuda version is 12.2.
+  # so, latest version cuda from triton server at today (16, Jun 2024) is 12.4, so i don't run latest version from triton server.
+    image: nvcr.io/nvidia/tritonserver:23.10-py3 # can run in my pc 
+    command: tritonserver --model-repository=/models
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+    volumes:
+      - ./model_repository:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

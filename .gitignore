@@ -1,3 +1,4 @@
+inference_server/model_repository/*/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
