@@ -42,27 +42,29 @@ func main() {
 		if receive_chat_id == env.TelegramChatId {
 			if update.Message != nil { // If we got a message
 				log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-				output := client.Process(update.Message.Text)
-				if output != "" {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
-					msg.ReplyToMessageID = update.Message.MessageID
-					bot.Send(msg)
-				} else if client.Run() {
-					err = client.Insert(update.Message.From.FirstName,
-						update.Message.From.LastName,
-						update.Message.From.UserName,
-						update.Message.Text,
-						int64(update.Message.MessageID),
-						update.Message.From.ID,
-					)
-					if err != nil {
-						msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+				if len(update.Message.Text) == 0 {
+					log.Printf("Sticker, Animation or Uploaded Image")
+				} else {
+					output := client.Process(update.Message.Text)
+					if output != "" {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
 						msg.ReplyToMessageID = update.Message.MessageID
 						bot.Send(msg)
+					} else if client.Run() {
+						err = client.Insert(update.Message.From.FirstName,
+							update.Message.From.LastName,
+							update.Message.From.UserName,
+							update.Message.Text,
+							int64(update.Message.MessageID),
+							update.Message.From.ID,
+						)
+						if err != nil {
+							msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+							msg.ReplyToMessageID = update.Message.MessageID
+							bot.Send(msg)
+						}
 					}
 				}
-
 			}
 		} else {
 			log.Printf("Detect Hacker! [%s] %s", update.Message.From.UserName, update.Message.Text)
