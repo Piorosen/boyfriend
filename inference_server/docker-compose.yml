@@ -19,4 +19,3 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-# /workspace/install/bin/image_client -m densenet_onnx -c 3 -s INCEPTION /workspace/images/mug.jpg
