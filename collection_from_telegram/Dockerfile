@@ -1,5 +1,8 @@
 FROM golang:1.22.4-alpine3.20 AS builder
-RUN apk add git g++ gcc
+RUN apk add --no-cache git g++ gcc
+
+ARG VERSION=NULL
+ARG DATE=NULL
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
@@ -9,7 +12,7 @@ ENV GO111MODULE=on \
 WORKDIR /build
 COPY . .
 RUN go mod download
-RUN go build -o main .
+RUN go build -o main -ldflags "-X 'main.BUILD_DATE_TIME=${DATE}' -X 'main.DEPLOY_VERSION=${VERSION}'" . 
 WORKDIR /dist
 RUN cp /build/main .
 

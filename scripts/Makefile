@@ -11,7 +11,7 @@ deploy_collection:
 # make deploy_collection VERSION=1.0.0
 
 	cd ../collection_from_telegram && \
-	docker build -t ghcr.io/$(NAMESPACE)/colllection-telegram:$(VERSION) .
+	docker build -t ghcr.io/$(NAMESPACE)/colllection-telegram:$(VERSION) --build-arg VERSION="$(VERSION)" --build-arg DATE="$(shell date)" .
 	docker push ghcr.io/$(NAMESPACE)/colllection-telegram:$(VERSION)
 
 deploy_converter:

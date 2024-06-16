@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"strings"
@@ -8,6 +10,20 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+var (
+	BUILD_DATE_TIME = "null"
+	DEPLOY_VERSION  = "0.0.0"
+	ALL_DATA_REMOVE = GenerateRandomHex(16)
+)
+
+func GenerateRandomHex(n int) string {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		log.Fatal(err)
+	}
+	return hex.EncodeToString(bytes)
+}
 
 type Message struct {
 	gorm.Model
@@ -52,6 +68,14 @@ func (client *Client) Connect(ip string, port int, db, id, pw string) error {
 	client.database = gorm_db
 
 	return err
+}
+
+func (client *Client) Clear() error {
+	// Message 구조체에 해당하는 모든 데이터를 삭제합니다.
+	if err := client.database.Where("1 = 1").Delete(&Message{}).Error; err != nil {
+		return fmt.Errorf("failed to delete all messages: %v", err)
+	}
+	return nil
 }
 
 func (client *Client) Insert(first_name, last_name, user_name, text string, text_id, user_id int64) error {
@@ -120,13 +144,27 @@ func (client *Client) Process(text string) string {
 		return ""
 	}
 	if text[0] == '/' {
-		switch strings.ToLower(text[1:]) {
+		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
 		case "on":
 			client.mode = true
 			return "데이터 수집을 재개 합니다."
 		case "off":
 			client.mode = false
 			return "데이터 수집을 중지 합니다."
+		case "version":
+			return fmt.Sprintf("Version : %s\nBuild Time : %s", DEPLOY_VERSION, BUILD_DATE_TIME)
+		case "clear":
+			data := strings.Split(text, " ")
+			if len(data) != 2 {
+				return fmt.Sprintf("아래의 명령어를 사용하시면 데이터베이스에 있는 모든 기록을 삭제합니다.\n/clear %s", ALL_DATA_REMOVE)
+			}
+			if data[1] == ALL_DATA_REMOVE {
+				err := client.Clear()
+				return fmt.Sprintf("Error : %v\n모든 처리를 수행하였습니다.", err)
+			} else {
+				return fmt.Sprintf("아래의 명령어를 사용하시면 데이터베이스에 있는 모든 기록을 삭제합니다.\n/clear %s", ALL_DATA_REMOVE)
+			}
+
 		case "count":
 			result := ""
 			data := client.Count()
