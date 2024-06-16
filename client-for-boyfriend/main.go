@@ -27,22 +27,14 @@
 package main
 
 import (
-	"bytes"
-	"context"
-	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
-	"time"
 
-	triton "github.com/Piorosen/boyfriend/client-for-boyfriend/grpc-client"
+	_ "image/jpeg" // Register JPEG format
 
-	"google.golang.org/grpc"
-)
-
-const (
-	inputSize  = 16
-	outputSize = 16
+	"github.com/Piorosen/boyfriend/client-for-boyfriend/service"
+	"github.com/disintegration/imaging"
 )
 
 type Flags struct {
@@ -52,204 +44,99 @@ type Flags struct {
 	URL          string
 }
 
+const (
+	inputSize  = 3 * 224 * 224
+	outputSize = 1000
+)
+
 func parseFlags() Flags {
 	var flags Flags
 	// https://github.com/NVIDIA/triton-inference-server/tree/master/docs/examples/model_repository/simple
-	flag.StringVar(&flags.ModelName, "m", "simple", "Name of model being served. (Required)")
-	flag.StringVar(&flags.ModelVersion, "x", "", "Version of model. Default: Latest Version.")
+	flag.StringVar(&flags.ModelName, "m", "densenet_onnx", "Name of model being served. (Required)")
+	flag.StringVar(&flags.ModelVersion, "x", "1", "Version of model. Default: Latest Version.")
 	flag.IntVar(&flags.BatchSize, "b", 1, "Batch size. Default: 1.")
 	flag.StringVar(&flags.URL, "u", "localhost:8001", "Inference Server URL. Default: localhost:8001")
 	flag.Parse()
 	return flags
 }
 
-func ServerLiveRequest(client triton.GRPCInferenceServiceClient) *triton.ServerLiveResponse {
-	// Create context for our request with 10 second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	serverLiveRequest := triton.ServerLiveRequest{}
-	// Submit ServerLive request to server
-	serverLiveResponse, err := client.ServerLive(ctx, &serverLiveRequest)
+// Function to read an image file, resize it to 224x224 pixels, and output a float array
+func ImageToFloatArray(fileName string) ([]float32, error) {
+	// Open a test image.
+	src, err := imaging.Open(fileName)
 	if err != nil {
-		log.Fatalf("Couldn't get server live: %v", err)
+		log.Fatalf("failed to open image: %v", err)
 	}
-	return serverLiveResponse
-}
-
-func ServerReadyRequest(client triton.GRPCInferenceServiceClient) *triton.ServerReadyResponse {
-	// Create context for our request with 10 second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	serverReadyRequest := triton.ServerReadyRequest{}
-	// Submit ServerReady request to server
-	serverReadyResponse, err := client.ServerReady(ctx, &serverReadyRequest)
-	if err != nil {
-		log.Fatalf("Couldn't get server ready: %v", err)
+	// Resize the cropped image to width = 200px preserving the aspect ratio.
+	src = imaging.Resize(src, 224, 224, imaging.Lanczos)
+	width := 224
+	height := 224
+	channels := 3
+	pixels := make([]float32, channels*width*height)
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			r, g, b, _ := src.At(x, y).RGBA()
+			// NCHW
+			// Normalize to [-1, 1] and store in the array
+			pixels[0*width*height+y*width+x] = (float32(r&0xff) / 127.5) - 1
+			pixels[1*width*height+y*width+x] = (float32(g&0xff) / 127.5) - 1
+			pixels[2*width*height+y*width+x] = (float32(b&0xff) / 127.5) - 1
+			// NHWC
+			// pixels[224*3*y+3*x+0] = (float32(r&0xff) / 127.5) - 1
+			// pixels[224*3*y+3*x+1] = (float32(g&0xff) / 127.5) - 1
+			// pixels[224*3*y+3*x+2] = (float32(b&0xff) / 127.5) - 1
+		}
 	}
-	return serverReadyResponse
-}
-
-func ModelMetadataRequest(client triton.GRPCInferenceServiceClient, modelName string, modelVersion string) *triton.ModelMetadataResponse {
-	// Create context for our request with 10 second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Create status request for a given model
-	modelMetadataRequest := triton.ModelMetadataRequest{
-		Name:    modelName,
-		Version: modelVersion,
-	}
-	// Submit modelMetadata request to server
-	modelMetadataResponse, err := client.ModelMetadata(ctx, &modelMetadataRequest)
-	if err != nil {
-		log.Fatalf("Couldn't get server model metadata: %v", err)
-	}
-	return modelMetadataResponse
-}
-
-func ModelInferRequest(client triton.GRPCInferenceServiceClient, rawInput [][]byte, modelName string, modelVersion string) *triton.ModelInferResponse {
-	// Create context for our request with 10 second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Create request input tensors
-	inferInputs := []*triton.ModelInferRequest_InferInputTensor{
-		&triton.ModelInferRequest_InferInputTensor{
-			Name:     "INPUT0",
-			Datatype: "INT32",
-			Shape:    []int64{1, 16},
-		},
-		&triton.ModelInferRequest_InferInputTensor{
-			Name:     "INPUT1",
-			Datatype: "INT32",
-			Shape:    []int64{1, 16},
-		},
-	}
-
-	// Create request input output tensors
-	inferOutputs := []*triton.ModelInferRequest_InferRequestedOutputTensor{
-		&triton.ModelInferRequest_InferRequestedOutputTensor{
-			Name: "OUTPUT0",
-		},
-		&triton.ModelInferRequest_InferRequestedOutputTensor{
-			Name: "OUTPUT1",
-		},
-	}
-
-	// Create inference request for specific model/version
-	modelInferRequest := triton.ModelInferRequest{
-		ModelName:    modelName,
-		ModelVersion: modelVersion,
-		Inputs:       inferInputs,
-		Outputs:      inferOutputs,
-	}
-
-	modelInferRequest.RawInputContents = append(modelInferRequest.RawInputContents, rawInput[0])
-	modelInferRequest.RawInputContents = append(modelInferRequest.RawInputContents, rawInput[1])
-
-	// Submit inference request to server
-	modelInferResponse, err := client.ModelInfer(ctx, &modelInferRequest)
-	if err != nil {
-		log.Fatalf("Error processing InferRequest: %v", err)
-	}
-	return modelInferResponse
-}
-
-// Convert int32 input data into raw bytes (assumes Little Endian)
-func Preprocess(inputs [][]int32) [][]byte {
-	inputData0 := inputs[0]
-	inputData1 := inputs[1]
-
-	var inputBytes0 []byte
-	var inputBytes1 []byte
-	// Temp variable to hold our converted int32 -> []byte
-	bs := make([]byte, 4)
-	for i := 0; i < inputSize; i++ {
-		binary.LittleEndian.PutUint32(bs, uint32(inputData0[i]))
-		inputBytes0 = append(inputBytes0, bs...)
-		binary.LittleEndian.PutUint32(bs, uint32(inputData1[i]))
-		inputBytes1 = append(inputBytes1, bs...)
-	}
-
-	return [][]byte{inputBytes0, inputBytes1}
-}
-
-// Convert slice of 4 bytes to int32 (assumes Little Endian)
-func readInt32(fourBytes []byte) int32 {
-	buf := bytes.NewBuffer(fourBytes)
-	var retval int32
-	binary.Read(buf, binary.LittleEndian, &retval)
-	return retval
-}
-
-// Convert output's raw bytes into int32 data (assumes Little Endian)
-func Postprocess(inferResponse *triton.ModelInferResponse) [][]int32 {
-	outputBytes0 := inferResponse.RawOutputContents[0]
-	outputBytes1 := inferResponse.RawOutputContents[1]
-
-	outputData0 := make([]int32, outputSize)
-	outputData1 := make([]int32, outputSize)
-	for i := 0; i < outputSize; i++ {
-		outputData0[i] = readInt32(outputBytes0[i*4 : i*4+4])
-		outputData1[i] = readInt32(outputBytes1[i*4 : i*4+4])
-	}
-	return [][]int32{outputData0, outputData1}
+	// fmt.Printf("%v", imaging.Save(src, "asdf.jpg"))
+	return pixels, nil
 }
 
 func main() {
+	fileName := "resources/mug.jpg"
+	floatArray, err := ImageToFloatArray(fileName)
+	if err != nil {
+		log.Fatalf("Error processing image: %v", err)
+	}
+
 	FLAGS := parseFlags()
 	fmt.Println("FLAGS:", FLAGS)
 
-	// Connect to gRPC server
-	conn, err := grpc.Dial(FLAGS.URL, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Couldn't connect to endpoint %s: %v", FLAGS.URL, err)
-	}
-	defer conn.Close()
+	client := service.NewClient()
+	client.Open(FLAGS.URL)
+	defer client.Close()
 
-	// Create client from gRPC server connection
-	client := triton.NewGRPCInferenceServiceClient(conn)
-
-	serverLiveResponse := ServerLiveRequest(client)
+	serverLiveResponse := client.ServerLiveRequest()
 	fmt.Printf("Triton Health - Live: %v\n", serverLiveResponse.Live)
 
-	serverReadyResponse := ServerReadyRequest(client)
+	serverReadyResponse := client.ServerReadyRequest()
 	fmt.Printf("Triton Health - Ready: %v\n", serverReadyResponse.Ready)
 
-	modelMetadataResponse := ModelMetadataRequest(client, FLAGS.ModelName, "")
+	modelMetadataResponse := client.ModelMetadataRequest(FLAGS.ModelName, FLAGS.ModelVersion)
 	fmt.Println(modelMetadataResponse)
+	input := Preprocess(floatArray)
+	// /* We use a simple model that takes 2 input tensors of 16 integers
+	// each and returns 2 output tensors of 16 integers each. One
+	// output tensor is the element-wise sum of the inputs and one
+	// output is the element-wise difference. */
+	inferResponse := client.ModelInferRequest(input, FLAGS.ModelName, FLAGS.ModelVersion)
+	// /* We expect there to be 2 results (each with batch-size 1). Walk
+	// over all 16 result elements and print the sum and difference
+	// calculated by the model. */
 
-	inputData0 := make([]int32, inputSize)
-	inputData1 := make([]int32, inputSize)
-	for i := 0; i < inputSize; i++ {
-		inputData0[i] = int32(i)
-		inputData1[i] = 1
+	labels, err := loadLabels("./resources/densenet_labels.txt")
+	outputs := Postprocess(inferResponse.RawOutputContents[0])
+	outputs = softmax(outputs)
+
+	if err != nil {
+		log.Fatalf("Error loading labels from file: %v", err)
 	}
-	inputs := [][]int32{inputData0, inputData1}
-	rawInput := Preprocess(inputs)
-
-	/* We use a simple model that takes 2 input tensors of 16 integers
-	each and returns 2 output tensors of 16 integers each. One
-	output tensor is the element-wise sum of the inputs and one
-	output is the element-wise difference. */
-	inferResponse := ModelInferRequest(client, rawInput, FLAGS.ModelName, FLAGS.ModelVersion)
-
-	/* We expect there to be 2 results (each with batch-size 1). Walk
-	over all 16 result elements and print the sum and difference
-	calculated by the model. */
-	outputs := Postprocess(inferResponse)
-	outputData0 := outputs[0]
-	outputData1 := outputs[1]
+	// outputs := string(inferResponse.RawOutputContents[0])
 
 	fmt.Println("\nChecking Inference Outputs\n--------------------------")
+
 	for i := 0; i < outputSize; i++ {
-		fmt.Printf("%d + %d = %d\n", inputData0[i], inputData1[i], outputData0[i])
-		fmt.Printf("%d - %d = %d\n", inputData0[i], inputData1[i], outputData1[i])
-		if (inputData0[i]+inputData1[i] != outputData0[i]) ||
-			inputData0[i]-inputData1[i] != outputData1[i] {
-			log.Fatalf("Incorrect results from inference")
+		if outputs[i]*100 > 5 {
+			fmt.Printf("%d : %s : %.1f %%\n", i, labels[i], outputs[i]*100)
 		}
 	}
 }
