@@ -1,0 +1,10 @@
+{
+  "name" : "3rdparty",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "ad25766aefb5313b6bc4e2a4b78a2946f84fbf66",
+  "dependencies" : [ {
+    "name" : "libsoundio",
+    "version>=" : "2.0.0#7",
+    "$comment" : "  # this is heuristically generated, and may not be correct\n\n  find_package(libsoundio CONFIG REQUIRED)\n\n  target_link_libraries(main PRIVATE libsoundio::libsoundio libsoundio::libsoundio_shared)\n"
+  } ]
+}
