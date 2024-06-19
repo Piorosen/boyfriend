@@ -32,7 +32,7 @@ public:
         return *instance;
     }
 
-    void setup(float threshold = 0.5f, float duration = 0.5f, float sample_rate = 44100, int frame_buffer = 256);
+    void setup(float threshold = 0.5f, float duration = 0.5f, float sample_rate = 44100, int frame_buffer = 512);
 
     void init();
     void start();

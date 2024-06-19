@@ -15,6 +15,7 @@ add_library(audio src/audio/src/audio.cpp
                         src/audio/src/internal/utils.cpp
                         src/audio/src/internal/audo_impl.cpp
                         src/audio/src/c_api.cpp
+                        src/args/args.cpp
 )
 
 add_executable(main main.cpp)

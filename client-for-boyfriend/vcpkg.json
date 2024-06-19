@@ -14,5 +14,8 @@
   }, {
     "name" : "cxxopts",
     "version>=" : "3.2.1"
+  }, {
+    "name" : "opencv4",
+    "version>=" : "4.8.0#19"
   } ]
 }
