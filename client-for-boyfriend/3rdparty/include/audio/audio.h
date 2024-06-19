@@ -13,32 +13,39 @@
 
 class audio {
 private:
-    static std::unique_ptr<audio> instance;
     audio(const audio&) = delete;
     audio(const audio&&) = delete;
     audio& operator=(const audio&) = delete;
-    static std::once_flag initInstanceFlag;
-    audio() {}
+    audio();
 
+    class audio_impl* impl_;
+
+    float threshold;
+    float duration;
+    float sample_rate;
+    int frame_buffer;
 public:
+    ~audio();
 
-
-    static audio& getInstance() {
-        std::call_once(initInstanceFlag, &audio::initSingleton);
+    static audio& get_instance() {
+        static std::unique_ptr<audio> instance(new audio);
         return *instance;
     }
 
-    static void initSingleton() {
-        instance.reset(new audio);
-    }
+    void setup(float threshold = 0.5f, float duration = 0.5f, float sample_rate = 44100, int frame_buffer = 256);
 
+    void init();
+    void start();
+    void close();
+    void terminate();
 
-    void setup(float threshold = 0.5f, float duration = 0.5f, float sampleRate = 44100);
+    bool play(const std::string& file);
+    void play(const std::vector<float>& memory, float sample_rate = -1, int channels = 1); // pcm
 
-    void play(std::string const& file);
-    void play(std::vector<uint8_t> const& memory);
+    bool record(const std::string& file, int channels = 1);
+    void record(std::vector<float>& memory); // pcm
 
-
+    bool save_to_file(const std::string& file, const std::vector<float>& memory, float sample_rate = -1, int channels = 1);
 };
 
 

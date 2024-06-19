@@ -10,15 +10,13 @@ find_package(portaudio CONFIG REQUIRED)
 find_package(SndFile CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-#add_library(libaudio src/src/audio.cpp
-#                     src/src/internal/utils.cpp)
+add_library(libaudio src/src/audio.cpp
+                     src/src/internal/utils.cpp
+                     src/src/internal/audo_impl.cpp)
+
 add_executable(main main.cpp)
 
-#target_link_libraries(libaudio PUBLIC portaudio_static)
-#target_link_libraries(libaudio PUBLIC SndFile::sndfile)
-#target_link_libraries(libaudio PUBLIC spdlog::spdlog)
-
-target_link_libraries(main PUBLIC portaudio_static)
-target_link_libraries(main PUBLIC SndFile::sndfile)
-target_link_libraries(main PUBLIC spdlog::spdlog)
-#target_link_libraries(main PUBLIC libaudio)
+target_link_libraries(libaudio PRIVATE portaudio_static)
+target_link_libraries(libaudio PRIVATE SndFile::sndfile)
+target_link_libraries(libaudio PRIVATE spdlog::spdlog)
+target_link_libraries(main PUBLIC libaudio)
