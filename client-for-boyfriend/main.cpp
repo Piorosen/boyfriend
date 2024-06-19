@@ -1,7 +1,9 @@
 #include <iostream>
 // #include <audio/audio.h>
 
-extern "C" void helloworld2(int data);
+extern "C" {
+#include <network/libnetwork.h>
+}
 
 int main() {
     // std::vector<float> data;
@@ -15,7 +17,7 @@ int main() {
     // audio::get_instance().save_to_file("nya.wav", data);
     //
     // audio::get_instance().terminate();
-    helloworld2(100);
+    set_environment("ㅁㄴㅇㄹ", 2222);
 
     return 0;
 }

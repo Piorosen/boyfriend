@@ -69,7 +69,7 @@ func Postprocess(inferResponse []byte) []float32 {
 }
 
 // LoadLabels loads labels from a file
-func loadLabels(filePath string) ([]string, error) {
+func LoadLabels(filePath string) ([]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func loadLabels(filePath string) ([]string, error) {
 }
 
 // Softmax function to convert logits to probabilities
-func softmax(logits []float32) []float32 {
+func Softmax(logits []float32) []float32 {
 	maxLogit := logits[0]
 	for _, logit := range logits {
 		if logit > maxLogit {
