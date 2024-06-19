@@ -2,12 +2,24 @@ package main
 
 /*
 #include <stdlib.h>
+#include <stdint.h>
+
+typedef struct {
+	uint8_t* data;
+	int32_t shape[4];
+} inference_request;
+
+typedef struct {
+	uint8_t* data;
+	int32_t shape;
+} inference_response;
 */
 import "C"
 
 import (
 	"fmt"
 	"log"
+	"unsafe"
 
 	"github.com/Piorosen/boyfriend/client-for-boyfriend/library/network/network"
 	"github.com/Piorosen/boyfriend/client-for-boyfriend/library/network/service"
@@ -49,17 +61,34 @@ func model_metadata_request(model_name, version *C.char) *C.char {
 	return ConvertGo2C(result.String())
 }
 
-//export inference_demo
-func inference_demo(name, version *C.char) *C.char {
+//export inference
+func inference(name, version *C.char, request *C.inference_request, response *C.inference_response) {
+	shape := 1
+	for _, i := range request.shape {
+		shape *= int(i)
+	}
 	n := ConvertC2Go(name)
 	v := ConvertC2Go(version)
 
-	fileName := "resources/mug.jpg"
-	floatArray, err := network.ImageToFloatArray(fileName)
+	data := C.GoBytes(unsafe.Pointer(request.data), C.int(shape))
+	resp := client.ModelInferRequest(data, n, v)
+	response.shape = 1000
+	response.data = (*C.uint8_t)(C.CBytes(resp.RawOutputContents[0]))
+}
+
+//export inference_demo
+func inference_demo(name, version, path_jpg, path_labels *C.char) *C.char {
+	n := ConvertC2Go(name)
+	v := ConvertC2Go(version)
+	jpg := ConvertC2Go(path_jpg)
+	label := ConvertC2Go(path_labels)
+
+	// fileName := "resources/mug.jpg"
+	floatArray, err := network.ImageToFloatArray(jpg)
 	if err != nil {
 		log.Fatalf("Error processing image: %v", err)
 	}
-	labels, err := network.LoadLabels("./resources/densenet_labels.txt")
+	labels, err := network.LoadLabels(label)
 
 	input := network.Preprocess(floatArray)
 	inferResponse := client.ModelInferRequest(input, n, v)

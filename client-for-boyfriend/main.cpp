@@ -5,7 +5,7 @@ extern "C" {
 #include <network/libnetwork.h>
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     // std::vector<float> data;
     // audio::get_instance().setup(0.5, 5);
     // audio::get_instance().init();
@@ -17,7 +17,8 @@ int main() {
     // audio::get_instance().save_to_file("nya.wav", data);
     //
     // audio::get_instance().terminate();
-    set_environment("ㅁㄴㅇㄹ", 2222);
+    set_environment("192.168.0.5", 2222);
+
 
     return 0;
 }
