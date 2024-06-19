@@ -3,8 +3,16 @@ project(test)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(libsoundio CONFIG REQUIRED)
+include_directories(./include)
 
-add_executable(test main.cpp)
+find_package(portaudio CONFIG REQUIRED)
+find_package(SndFile CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
-target_link_libraries(test PRIVATE libsoundio::libsoundio libsoundio::libsoundio_shared)
+#add_library(core)
+add_executable(test record.cpp)
+
+target_link_libraries(test PRIVATE portaudio_static)
+target_link_libraries(test PRIVATE SndFile::sndfile)
+target_link_libraries(test PRIVATE spdlog::spdlog)
+

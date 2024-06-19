@@ -1,10 +1,15 @@
 {
-  "name" : "3rdparty",
+  "name" : "test",
   "version-string" : "1.0.0",
-  "builtin-baseline" : "ad25766aefb5313b6bc4e2a4b78a2946f84fbf66",
+  "builtin-baseline" : "ded9717095600a356b624cab03326e44764afed4",
   "dependencies" : [ {
-    "name" : "libsoundio",
-    "version>=" : "2.0.0#7",
-    "$comment" : "  # this is heuristically generated, and may not be correct\n\n  find_package(libsoundio CONFIG REQUIRED)\n\n  target_link_libraries(main PRIVATE libsoundio::libsoundio libsoundio::libsoundio_shared)\n"
+    "name" : "portaudio",
+    "version>=" : "19.7#5"
+  }, {
+    "name" : "spdlog",
+    "version>=" : "1.14.1"
+  }, {
+    "name" : "libsndfile",
+    "version>=" : "1.2.2"
   } ]
 }
