@@ -3,7 +3,7 @@ package service
 import (
 	"log"
 
-	triton "github.com/Piorosen/boyfriend/client-for-boyfriend/grpc-client"
+	triton "github.com/Piorosen/boyfriend/client-for-boyfriend/library/network/grpc-client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

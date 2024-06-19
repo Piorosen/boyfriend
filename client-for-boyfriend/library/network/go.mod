@@ -1,4 +1,4 @@
-module github.com/Piorosen/boyfriend/client-for-boyfriend
+module github.com/Piorosen/boyfriend/client-for-boyfriend/library/network
 
 go 1.22.4
 

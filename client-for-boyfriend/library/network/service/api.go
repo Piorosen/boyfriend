@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	triton "github.com/Piorosen/boyfriend/client-for-boyfriend/grpc-client"
+	triton "github.com/Piorosen/boyfriend/client-for-boyfriend/library/network/grpc-client"
 )
 
 func (client *Client) ServerLiveRequest() *triton.ServerLiveResponse {
