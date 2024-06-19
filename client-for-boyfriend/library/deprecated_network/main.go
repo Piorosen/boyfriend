@@ -1,6 +1,11 @@
 package main
 
 /*
+#cgo LDFLAGS: -framework Security -framework CoreFoundation -lresolv
+#include <Security/Security.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <resolv.h>
+
 #include <stdlib.h>
 #include <stdint.h>
 
