@@ -1,5 +1,5 @@
 {
-  "name" : "test",
+  "name" : "main",
   "version-string" : "1.0.0",
   "builtin-baseline" : "ded9717095600a356b624cab03326e44764afed4",
   "dependencies" : [ {
@@ -14,8 +14,5 @@
   }, {
     "name" : "cxxopts",
     "version>=" : "3.2.1"
-  }, {
-    "name" : "opencv4",
-    "version>=" : "4.8.0#19"
   } ]
 }

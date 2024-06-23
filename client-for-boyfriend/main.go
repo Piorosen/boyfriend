@@ -1,16 +1,20 @@
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 func main() {
+	fmt.Print(os.Args)
 	data := Asdwasi()
 	data.Setup(0, 3, 44100, 512)
 	data.Init()
 	data.Start()
 	record := data.Record()
 	data.Close()
-	data.Play(record, 44100, 1)
-
+	data.Play(record, -1, 1)
 	data.Terminate()
-
 }
 
 // var triton_host string

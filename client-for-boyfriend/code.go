@@ -1,8 +1,8 @@
 package main
 
 //#cgo CXXFLAGS: -std=c++17
-//#cgo LDFLAGS: -L. -laudio
-//#include "c_api.h"
+//#cgo LDFLAGS: -L./library -laudio
+//#include "library/c_api.h"
 import "C"
 import (
 	"errors"
@@ -19,6 +19,10 @@ type Audio struct {
 
 func Asdwasi() *Audio {
 	return &Audio{}
+}
+
+func (a *Audio) Demo() {
+	C.demo()
 }
 
 func (a *Audio) Setup(threshold float32, duration float32, sampleRate float32, frameBuffer int) {
@@ -57,13 +61,11 @@ func (a *Audio) Terminate() {
 func (a *Audio) Play(memory []float32, sample_rate float32, channels int) {
 	// Play audio from memory
 	fmt.Println("Playing audio from memory")
-	if sample_rate != -1 {
+	if sample_rate < 0 {
 		a.SampleRate = sample_rate
 	}
 	// Audio playing logic
-	ptr := (*C.float)(unsafe.Pointer(&memory[0]))
-	size := len(memory)
-	C.play(ptr, (*C.int)(unsafe.Pointer(&size)), C.float(sample_rate), C.int(channels))
+	C.play(C.float(sample_rate), C.int(channels))
 }
 
 func (a *Audio) Record() []float32 {
@@ -75,9 +77,10 @@ func (a *Audio) Record() []float32 {
 	ptr := (*C.float)(unsafe.Pointer(&memory))
 	var length int
 
-	C.record(ptr, (*C.int)(unsafe.Pointer(&length)))
+	C.record()
+	memory = convertCFloatArray(ptr, length)
 
-	return convertCFloatArray(ptr, length)
+	return memory
 }
 
 func SaveToFile(file string, memory []float32, size int, sampleRate float32, channels int) error {
