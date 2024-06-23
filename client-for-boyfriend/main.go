@@ -7,7 +7,7 @@ import (
 
 func main() {
 	fmt.Print(os.Args)
-	data := Asdwasi()
+	data := NewAudio()
 	data.Setup(0, 3, 44100, 512)
 	data.Init()
 	data.Start()

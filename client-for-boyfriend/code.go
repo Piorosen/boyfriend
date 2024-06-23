@@ -17,7 +17,7 @@ type Audio struct {
 	FrameBuffer int
 }
 
-func Asdwasi() *Audio {
+func NewAudio() *Audio {
 	return &Audio{}
 }
 
