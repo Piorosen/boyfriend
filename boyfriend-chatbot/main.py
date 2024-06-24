@@ -1,56 +1,30 @@
-#%%
-from load_env import get_text
-import transformers
-import torch
-#%%
+from flask import Flask, request, jsonify
+from load_env import get_environment, next_tokne
+from collection import Collection
+from inference import get_model, get_next_text
 
-data = get_text()
-#%%
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-print(device)
-#%%
+ip, port, user, pw, db = get_environment()
+coll = Collection(ip, port, user, pw, db)
+coll.open()
+model = get_model()
 
-#%%
-model_id = "MLP-KTLim/llama-3-Korean-Bllossom-8B"
+app = Flask(__name__)
 
-pipeline = transformers.pipeline(
-    "text-generation",
-    model=model_id,
-    model_kwargs={"torch_dtype": torch.float16},
-    # device_map="auto",
-    device=0,
-)
+@app.route('/request/next_sentence', methods=['POST'])
+def json_example():
+    global coll, model, jubu_id
+    if request.is_json:
+        data = request.get_json()
+        size = data.get('size', 100)
+        jubu_id = data.get('jubu_id', -1)
 
-pipeline.model.eval()
-# %%
+        texts = coll.get_text()
+        texts = reversed(texts)
+        texts = next_tokne(texts)
+        result = get_next_text(jubu_id, texts, model, size)
+        return jsonify(message=f"{result}")
+    else:
+        return jsonify(message="Request was not JSON"), 400
 
-PROMPT = '''You are a helpful AI assistant. Please answer the user's questions kindly. 당신은 유능한 AI 어시스턴트 입니다. 사용자의 질문에 대해 친절하게 답변해주세요.'''
-instruction = "서울의 유명한 관광 코스를 만들어줄래?"
-
-messages = [
-    {"role": "system", "content": f"{PROMPT}"},
-    {"role": "user", "content": f"{instruction}"}
-    ]
-
-prompt = pipeline.tokenizer.apply_chat_template(
-        messages, 
-        tokenize=False, 
-        add_generation_prompt=True
-)
-
-terminators = [
-    pipeline.tokenizer.eos_token_id,
-    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
-]
-
-outputs = pipeline(
-    prompt,
-    max_new_tokens=2048,
-    eos_token_id=terminators,
-    do_sample=True,
-    temperature=0.6,
-    top_p=0.9
-)
-
-print(outputs[0]["generated_text"][len(prompt):])
-# %%
+if __name__ == '__main__':
+    app.run(debug=True)
