@@ -23,8 +23,8 @@ class message(Base):
     text = Column(Text, nullable=True)
 
 class Database():
-    def __init__(self, ip, user, password, db):
-        URL = f'postgresql://{user}:{password}@{ip}:{5432}/{db}'
+    def __init__(self, ip, port, user, password, db):
+        URL = f'postgresql://{user}:{password}@{ip}:{port}/{db}'
         engine = create_engine(URL, client_encoding='utf8')
         # 세션 생성
         self.Session = sessionmaker(bind=engine)

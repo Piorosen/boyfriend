@@ -56,3 +56,10 @@ urllib3==2.2.2
 xxhash==3.4.1
 yarl==1.9.4
 accelerate==0.31.0
+
+
+greenlet==3.0.3
+psycopg2==2.9.9
+python-dotenv==1.0.1
+SQLAlchemy==2.0.30
+typing_extensions==4.12.2
