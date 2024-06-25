@@ -17,7 +17,7 @@ services:
       - "39502:5432"
 
   telegram_bot:
-    image: ghcr.io/piorosen/colllection-telegram:1.1.1
+    image: ghcr.io/piorosen/colllection-telegram:1.1.2
     # build: 
       # context: '.'
     restart: unless-stopped
