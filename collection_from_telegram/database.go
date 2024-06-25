@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"gorm.io/driver/postgres"
@@ -139,12 +141,20 @@ func (client *Client) Run() bool {
 	return client.mode
 }
 
-func (client *Client) Process(text string) string {
+func (client *Client) Process(text string, env Environment) string {
 	if len(text) == 0 {
 		return ""
 	}
 	if text[0] == '/' {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
+		case "chat":
+			jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
+			req, err := http.NewRequest("POST", "http://%s/request/next_sentence", bytes.NewBuffer([]byte(jsonData)))
+			if err != nil {
+				fmt.Println("Error Creating Request:", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
 		case "on":
 			client.mode = true
 			return "데이터 수집을 재개 합니다."

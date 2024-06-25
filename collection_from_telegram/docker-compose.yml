@@ -17,7 +17,7 @@ services:
       - "5432:5432"
 
   telegram_bot:
-    image: ghcr.io/piorosen/colllection-telegram:1.0.4
+    image: ghcr.io/piorosen/colllection-telegram:1.1.0
     # build: 
       # context: '.'
     restart: unless-stopped
@@ -28,6 +28,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      GPU_SERVER: ${GPU_SERVER}
+      JUBU_TELEGRAM_ID: ${JUBU_TELEGRAM_ID}
     networks:
       - backend
 

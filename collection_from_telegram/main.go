@@ -45,7 +45,7 @@ func main() {
 				if len(update.Message.Text) == 0 {
 					log.Printf("Sticker, Animation or Uploaded Image")
 				} else {
-					output := client.Process(update.Message.Text)
+					output := client.Process(update.Message.Text, env)
 					if output != "" {
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
 						msg.ReplyToMessageID = update.Message.MessageID
