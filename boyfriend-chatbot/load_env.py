@@ -27,12 +27,14 @@ def get_environment():
 def next_tokne(data):
     result = []
     for item in data:
-        if len(result) == 0:
-            result.append(item)
-        elif item.user_id == result[-1].user_id:
-            result[-1].text += ', ' + item.text
-        else:
-            result.append(item)
+        # if len(result) == 0:
+        #     result.append(item)
+        # elif item.user_id == result[-1].user_id:
+        #     result[-1].text += ', ' + item.text
+        # else:
+        #     result.append(item)
+
+        result.append(item)
     return result
 
 def get_text(ip, port, user, pw, db):

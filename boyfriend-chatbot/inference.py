@@ -3,12 +3,16 @@ import torch
 
 def make_prompt(data, last: int, jinju_id: int):
     result = ""
+    format_string = "%H:%M:%S"
+
     for item in data[-last:]:
         # Doremi
-        if item.user_id == 1657801720:
-            result += f"진주 : {item.text}\n"            
+        if item.user_id == jinju_id:
+            # result += f"차차 : {item.text}\n"            
+            result += f"({item.created_at.strftime(format_string)}) 진주 : {item.text}\n"            
         else:
-            result += f"차차핑 : {item.text}\n"
+            # result += f"진주 : {item.text}\n"
+            result += f"({item.created_at.strftime(format_string)}) 차차 : {item.text}\n"            
     
     return result
 
@@ -27,17 +31,22 @@ def get_model():
 
 def get_next_text(jinju_id, text_set, pipeline, size:int = 100):
     PROMPT = f'''
-채팅하는 인원은 `차차핑`과 `진주` 입니다.
-지금 부터 `진주`는 말을 하는것이 금지 되어 있습니다.
-`차차핑`은 오직 한 문장만 이야기하여야 하며, 이제 말을 해야할 차례 입니다.
-`차차핑`은 `진주`를 엄청나게 좋아하므로, 사랑의 멘트를 섞어서 이야기 합니다.
-`차차핑`은 최대한 이모티콘과 개발 용어를 섞어서 말을 합니다.
-다음의 대화를 예측하여 `차차핑`이 할 것 같은 이야기를 진행해주세요.
-{text_set[-1].text}
-    '''
+대화 참여자: 진주와 차차.
+
+조건:
+1. 진주는 이 대화에서 말을 할 수 없습니다.
+2. 차차가 말하는 모든 문장이나 대화는 개발과 연관지어서 말합니다.
+3. 현재 차차가 말할 차례입니다.
+4. 최대한 귀엽고, 이모티콘과 C++ 언어 스타일 형태의 문장을 구성하세요.
+5. 차차는 진주를 좋아하고 사모합니다.
+6. 다음 문장 예측은 오직 한 문장만 수행하세요.
+
+추가 요청: 차차가 할 법한 대화 내용을 예측하여 제시해 주세요. 차차의 대화는 가능한 한 창의적이고 랜덤한 요소를 포함해야 합니다.
+대화 구조 : (시간) 참여자 명 : 대화 내용
+'''
                 
     instruction = make_prompt(text_set, size, jinju_id)
-
+    
     messages = [
         {"role": "system", "content": f"{PROMPT}"},
         {"role": "chat", "content": f"{instruction}"}

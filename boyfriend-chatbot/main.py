@@ -15,14 +15,19 @@ def json_example():
     global coll, model, jubu_id
     if request.is_json:
         data = request.get_json()
-        size = data.get('size', 100)
+        size = data.get('size', 3)
         jubu_id = data.get('jubu_id', -1)
 
         texts = coll.get_text()
         texts = reversed(texts)
         texts = next_tokne(texts)
-        result = get_next_text(jubu_id, texts, model, size)
-        return jsonify(message=f"{result}")
+        result = get_next_text(jubu_id, texts, model, 3)
+        r = result.split("\n")
+        r = list(filter(lambda x: x != "", r))
+        r = list(map(lambda x: x[len('(00:00:00) 차차 :'):].strip(), r))
+        re = "\n".join(r)
+        return jsonify(message=f"{re}")
+            
     else:
         return jsonify(message="Request was not JSON"), 400
 
