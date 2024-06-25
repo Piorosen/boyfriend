@@ -18,8 +18,11 @@ def get_environment():
 
     postgresql_db = os.getenv('POSTGRES_DB')
     assert(postgresql_db != '')
+    
+    # jinju_id = os.getenv('TELEGRAM_USER_JINJU_ID')
+    # assert(jinju_id != '')
 
-    return postgresql_ip, postgresql_port, postgresql_user, postgresql_password, postgresql_db
+    return postgresql_ip, postgresql_port, postgresql_user, postgresql_password, postgresql_db #, jinju_id
 
 def next_tokne(data):
     result = []
@@ -27,13 +30,12 @@ def next_tokne(data):
         if len(result) == 0:
             result.append(item)
         elif item.user_id == result[-1].user_id:
-            result[-1].text += '\n' + item.text
+            result[-1].text += ', ' + item.text
         else:
             result.append(item)
     return result
 
-def get_text():
-    ip, port, user, pw, db = get_environment()
+def get_text(ip, port, user, pw, db):
     coll = Collection(ip, port, user, pw, db)
     coll.open()
     data = coll.get_text()
@@ -46,3 +48,5 @@ def get_text():
     #             'text_id': x.text_id,
     #             'user_id': x.user_id}, data))
     return data
+
+
