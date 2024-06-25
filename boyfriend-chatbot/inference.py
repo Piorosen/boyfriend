@@ -63,4 +63,4 @@ def get_next_text(jinju_id, text_set, pipeline, size:int = 100):
         top_p=0.9
     )
     
-    return print(outputs[0]["generated_text"][len(prompt):])
+    return outputs[0]["generated_text"][len(prompt):]
