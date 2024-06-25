@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 	client := NewClient()
-	err = client.Connect(env.PostgresIP, 39502, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
+	err = client.Connect(env.PostgresIP, 5432, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
 	if err != nil {
 		log.Panic(err)
 	}
