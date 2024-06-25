@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type Environment struct {
@@ -12,6 +13,9 @@ type Environment struct {
 	PostgresUser     string
 	PostgresPassword string
 	PostgresDB       string
+	PreviousTextSize int
+	TelegramJubuId   int
+	GpuServer        string
 }
 
 func GetEnvironment() (Environment, error) {
@@ -41,6 +45,24 @@ func GetEnvironment() (Environment, error) {
 	if postgres_db == "" {
 		return Environment{}, fmt.Errorf("POSTGRES_DB 환경 변수를 설정해주세요")
 	}
+
+	gpu_server := os.Getenv("GPU_SERVER")
+	if gpu_server == "" {
+		return Environment{}, fmt.Errorf("GPU_SERVER 환경 변수를 설정해주세요")
+	}
+
+	jubu_telegram_id := os.Getenv("JUBU_TELEGRAM_ID")
+	if jubu_telegram_id == "" {
+		return Environment{}, fmt.Errorf("JUBU_TELEGRAM_ID 환경 변수를 설정해주세요")
+	}
+	id, _ := strconv.ParseInt(jubu_telegram_id, 10, 32)
+
+	previous_text_size := os.Getenv("PreviousTextSize")
+	if previous_text_size == "" {
+		return Environment{}, fmt.Errorf("JUBU_TELEGRAM_ID 환경 변수를 설정해주세요")
+	}
+	size, _ := strconv.ParseInt(previous_text_size, 10, 32)
+
 	return Environment{
 		TelegramBotToken: token,
 		TelegramChatId:   chat_id,
@@ -48,5 +70,8 @@ func GetEnvironment() (Environment, error) {
 		PostgresUser:     postgres_user,
 		PostgresPassword: postgres_password,
 		PostgresDB:       postgres_db,
+		GpuServer:        gpu_server,
+		TelegramJubuId:   int(id),
+		PreviousTextSize: int(size),
 	}, nil
 }
