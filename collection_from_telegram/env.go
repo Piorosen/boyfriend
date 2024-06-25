@@ -57,9 +57,9 @@ func GetEnvironment() (Environment, error) {
 	}
 	id, _ := strconv.ParseInt(jubu_telegram_id, 10, 32)
 
-	previous_text_size := os.Getenv("PreviousTextSize")
+	previous_text_size := os.Getenv("FROM_DATABASE_READ_SIZE")
 	if previous_text_size == "" {
-		return Environment{}, fmt.Errorf("JUBU_TELEGRAM_ID 환경 변수를 설정해주세요")
+		return Environment{}, fmt.Errorf("FROM_DATABASE_READ_SIZE 환경 변수를 설정해주세요")
 	}
 	size, _ := strconv.ParseInt(previous_text_size, 10, 32)
 

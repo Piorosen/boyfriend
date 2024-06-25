@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -149,11 +151,30 @@ func (client *Client) Process(text string, env Environment) string {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
 		case "chat":
 			jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
-			req, err := http.NewRequest("POST", "http://%s/request/next_sentence", bytes.NewBuffer([]byte(jsonData)))
+			req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/request/next_sentence", env.GpuServer), bytes.NewBuffer([]byte(jsonData)))
 			if err != nil {
-				fmt.Println("Error Creating Request:", err)
+				return "Error : " + err.Error()
 			}
 			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println("Error Sending Request:", err)
+				return "Error : " + err.Error()
+			}
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return "Error Reading Response:" + err.Error()
+			}
+			var res map[string]string
+
+			err = json.Unmarshal(body, &res)
+			if err != nil {
+				return "Error json parseing:" + err.Error()
+			}
+			return res["message"]
 
 		case "on":
 			client.mode = true
