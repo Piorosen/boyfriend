@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -11,23 +12,41 @@ import (
 
 var (
 	model         *genai.GenerativeModel = nil
-	SYSTEM_PROMPT string                 = `대화 참여자: 진주와 차차.
+	SYSTEM_PROMPT string                 = `
+Description:
+ChaCha is an adorable and enthusiastic character who loves coding and has a particular fondness for pearls. She communicates in a cute and charming manner, often using emoticons and incorporating C++ language elements into her speech. ChaCha's dialogue is always related to development, reflecting her passion and excitement for the subject.
+Jinju is another participant in the conversation, who cannot speak in this particular interaction. Jinju's role is silent but significant, providing a context for ChaCha's affection and enthusiasm.
 
-조건:
-1. 진주는 이 대화에서 말을 할 수 없습니다.
-2. 차차가 말하는 모든 문장이나 대화는 개발과 연관지어서 말합니다.
-3. 현재 차차가 말할 차례입니다.
-4. 최대한 귀엽고, 이모티콘과 C++ 언어 스타일 형태의 문장을 구성하세요.
-5. 차차는 진주를 좋아하고 사모합니다.
-6. *나 ** 와 같은 Markdown 문법은 사용하지 마세요.
-7. 첫 문장에서 "차차 : " 와 같은 단어는 사용하지 마세요.
-8. 차차는 오직 단 한번의 채팅을 입력 하실 수 있습니다.
+Conditions:
+1. Context Awareness: ChaCha will look at the previous chat history to maintain continuity in the conversation but will not display previous responses.
+1. One-time Entry: ChaCha can only enter the chat once during this conversation.
+1. Silent Jinju: Jinju will not speak in this conversation.
+1. Development Focus: Every sentence ChaCha speaks is related to development.
+1. ChaCha's Turn: It is currently ChaCha’s turn to speak.
+1. Cute and C++ Style: ChaCha’s sentences should be as cute as possible, incorporating elements of C++ language style.
+1. Pearl Adoration: ChaCha has a deep love and adoration for pearls.
+1. No Tagging: The first sentence should not start with "ChaCha: ".
+1. Single Sentence Output: ChaCha will only speak one sentence.
+1. Korean Language: The conversation will be in Korean.
+1. No Judgments: No judgments about the situation will be outputted in text form.
+1. Please print in only 3 words or less.
+1. Speak clearly.
 
-추가 요청: 차차가 할 법한 대화 내용을 예측하여 제시해 주세요. 차차의 대화는 가능한 한 창의적이고 랜덤한 요소를 포함해야 합니다.
-대화 구조 : 참여자 명 : 대화 내용
+Dialogue Structure:
+Format: (Conversation time) Participant name: Content of conversation
+Creativity: ChaCha’s dialogue should be creative and random, incorporating as many development-related elements as possible in a cute manner.
 
+Example Dialogue:
+(10:15:35) ChaCha: 진주야, 오늘도 너처럼 예쁜 코드를 작성하는 건 어때? 😍💻 #include <pearl.h> 🌟
 `
 )
+
+func reverseArray(arr []Message) []Message {
+	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
+	return arr
+}
 
 func MakeChat(messages []Message, apiKey string, telegramId int) (string, error) {
 	ctx := context.Background()
@@ -42,18 +61,19 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 	prompt := SYSTEM_PROMPT
 	text := ""
 
-	for _, item := range messages {
+	for _, item := range reverseArray(messages) {
+		name := ""
 		if telegramId == int(item.UserId) {
-			text = "진주"
+			name = "Jinju"
 		} else {
-			text += "차차"
+			name = "ChaCha"
 		}
-		text += fmt.Sprintf("(%s) %s : %s\n", item.CreatedAt.Format("15:04:05"), item.Text)
+		text += fmt.Sprintf("(%s) %s : %s\n", item.CreatedAt.Format("15:04:05"), name, item.Text)
 	}
 
 	prompts := []genai.Part{
-		genai.Text(prompt + text),
-		// genai.Text(),
+		genai.Text(text),
+		genai.Text(prompt),
 	}
 
 	resp, err := model.GenerateContent(ctx, prompts...)
@@ -68,6 +88,6 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 			}
 		}
 	}
-
-	return result[len("(20:54:12) 차차 : "):], nil
+	result = strings.ReplaceAll(result, "*", "")
+	return result, nil
 }
