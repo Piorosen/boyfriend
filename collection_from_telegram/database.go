@@ -1,14 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"gorm.io/driver/postgres"
@@ -97,6 +93,22 @@ func (client *Client) Insert(first_name, last_name, user_name, text string, text
 	return result.Error
 }
 
+func (client *Client) GetText(limit int) []Message {
+	var results []Message
+
+	err := client.database.Model(&Message{}).
+		Select("*").
+		Order("created_at DESC").
+		Limit(limit).
+		Scan(&results).Error
+
+	if err != nil {
+		log.Fatalf("Error executing query: %v", err)
+	}
+
+	return results
+}
+
 func (client *Client) Count() []DBCount {
 	var get_user_id []struct {
 		UserId int64
@@ -150,31 +162,14 @@ func (client *Client) Process(text string, env Environment) string {
 	if text[0] == '/' {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
 		case "chat":
-			jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
-			req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/request/next_sentence", env.GpuServer), bytes.NewBuffer([]byte(jsonData)))
+			// jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
+			message := client.GetText(env.PreviousTextSize)
+			result, err := MakeChat(message, env.GeminiApiKey, env.TelegramJubuId)
 			if err != nil {
-				return "Error : " + err.Error()
+				return err.Error()
+			} else {
+				return result
 			}
-			req.Header.Set("Content-Type", "application/json")
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("Error Sending Request:", err)
-				return "Error : " + err.Error()
-			}
-			defer resp.Body.Close()
-
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return "Error Reading Response:" + err.Error()
-			}
-			var res map[string]string
-
-			err = json.Unmarshal(body, &res)
-			if err != nil {
-				return "Error json parseing:" + err.Error()
-			}
-			return res["message"]
 
 		case "on":
 			client.mode = true

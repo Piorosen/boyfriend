@@ -15,7 +15,7 @@ type Environment struct {
 	PostgresDB       string
 	PreviousTextSize int
 	TelegramJubuId   int
-	GpuServer        string
+	GeminiApiKey     string
 }
 
 func GetEnvironment() (Environment, error) {
@@ -46,9 +46,9 @@ func GetEnvironment() (Environment, error) {
 		return Environment{}, fmt.Errorf("POSTGRES_DB 환경 변수를 설정해주세요")
 	}
 
-	gpu_server := os.Getenv("GPU_SERVER")
-	if gpu_server == "" {
-		return Environment{}, fmt.Errorf("GPU_SERVER 환경 변수를 설정해주세요")
+	gemini_api_key := os.Getenv("GEMINI_API_KEY")
+	if gemini_api_key == "" {
+		return Environment{}, fmt.Errorf("GEMINI_API_KEY 환경 변수를 설정해주세요")
 	}
 
 	jubu_telegram_id := os.Getenv("JUBU_TELEGRAM_ID")
@@ -70,7 +70,7 @@ func GetEnvironment() (Environment, error) {
 		PostgresUser:     postgres_user,
 		PostgresPassword: postgres_password,
 		PostgresDB:       postgres_db,
-		GpuServer:        gpu_server,
+		GeminiApiKey:     gemini_api_key,
 		TelegramJubuId:   int(id),
 		PreviousTextSize: int(size),
 	}, nil
