@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 	client := NewClient()
-	err = client.Connect(env.PostgresIP, 5432, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
+	err = client.Connect(env.PostgresIP, env.PostgresPort, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -58,11 +58,11 @@ func main() {
 							int64(update.Message.MessageID),
 							update.Message.From.ID,
 						)
-						if err != nil {
-							msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-							msg.ReplyToMessageID = update.Message.MessageID
-							bot.Send(msg)
-						}
+					}
+					if err != nil {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+						msg.ReplyToMessageID = update.Message.MessageID
+						bot.Send(msg)
 					}
 				}
 			}

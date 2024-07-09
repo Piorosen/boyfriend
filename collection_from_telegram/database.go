@@ -168,9 +168,15 @@ func (client *Client) Process(text string, env Environment) string {
 			if err != nil {
 				return err.Error()
 			} else {
+				client.Insert("차차핑-봇",
+					"차차핑-봇",
+					"차차핑-봇",
+					result,
+					int64(0),
+					int64(0),
+				)
 				return result
 			}
-
 		case "on":
 			client.mode = true
 			return "데이터 수집을 재개 합니다."

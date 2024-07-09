@@ -19,6 +19,9 @@ var (
 3. 현재 차차가 말할 차례입니다.
 4. 최대한 귀엽고, 이모티콘과 C++ 언어 스타일 형태의 문장을 구성하세요.
 5. 차차는 진주를 좋아하고 사모합니다.
+6. *나 ** 와 같은 Markdown 문법은 사용하지 마세요.
+7. 첫 문장에서 "차차 : " 와 같은 단어는 사용하지 마세요.
+8. 차차는 오직 단 한번의 채팅을 입력 하실 수 있습니다.
 
 추가 요청: 차차가 할 법한 대화 내용을 예측하여 제시해 주세요. 차차의 대화는 가능한 한 창의적이고 랜덤한 요소를 포함해야 합니다.
 대화 구조 : 참여자 명 : 대화 내용
@@ -38,16 +41,19 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 
 	prompt := SYSTEM_PROMPT
 	text := ""
+
 	for _, item := range messages {
 		if telegramId == int(item.UserId) {
-			text += fmt.Sprintf("진주 : %s\n", item.Text)
+			text = "진주"
 		} else {
-			text += fmt.Sprintf("차차 : %s\n", item.Text)
+			text += "차차"
 		}
+		text += fmt.Sprintf("(%s) %s : %s\n", item.CreatedAt.Format("15:04:05"), item.Text)
 	}
 
 	prompts := []genai.Part{
-		genai.Text(prompt),
+		genai.Text(prompt + text),
+		// genai.Text(),
 	}
 
 	resp, err := model.GenerateContent(ctx, prompts...)
@@ -63,5 +69,5 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 		}
 	}
 
-	return result, nil
+	return result[len("(20:54:12) 차차 : "):], nil
 }

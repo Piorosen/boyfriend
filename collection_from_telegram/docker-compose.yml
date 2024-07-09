@@ -16,23 +16,23 @@ services:
     ports:
       - "39502:5432"
 
-  telegram_bot:
-    image: ghcr.io/piorosen/colllection-telegram:1.1.2
-    # build: 
-      # context: '.'
-    restart: unless-stopped
-    environment:
-      TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}
-      TELEGRAM_BOT_API_CHAT_ID: ${TELEGRAM_BOT_API_CHAT_ID}
-      POSTGRES_IP: ${POSTGRES_IP}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      JUBU_TELEGRAM_ID: ${JUBU_TELEGRAM_ID}
-      FROM_DATABASE_READ_SIZE: ${FROM_DATABASE_READ_SIZE}
-    networks:
-      - backend
+  # telegram_bot:
+  #   # image: ghcr.io/piorosen/colllection-telegram:1.1.2
+  #   build: 
+  #     context: '.'
+  #   restart: unless-stopped
+  #   environment:
+  #     TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}
+  #     TELEGRAM_BOT_API_CHAT_ID: ${TELEGRAM_BOT_API_CHAT_ID}
+  #     POSTGRES_IP: ${POSTGRES_IP}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     GEMINI_API_KEY: ${GEMINI_API_KEY}
+  #     JUBU_TELEGRAM_ID: ${JUBU_TELEGRAM_ID}
+  #     FROM_DATABASE_READ_SIZE: ${FROM_DATABASE_READ_SIZE}
+  #   networks:
+  #     - backend
 
 networks:
   backend:

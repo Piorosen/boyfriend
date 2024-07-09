@@ -10,6 +10,7 @@ type Environment struct {
 	TelegramBotToken string
 	TelegramChatId   string
 	PostgresIP       string
+	PostgresPort     int
 	PostgresUser     string
 	PostgresPassword string
 	PostgresDB       string
@@ -32,6 +33,12 @@ func GetEnvironment() (Environment, error) {
 	if chat_id == "" {
 		return Environment{}, fmt.Errorf("POSTGRES_IP 환경 변수를 설정해주세요")
 	}
+
+	postgres_port := os.Getenv("POSTGRES_PORT")
+	if chat_id == "" {
+		return Environment{}, fmt.Errorf("POSTGRES_PORT 환경 변수를 설정해주세요")
+	}
+	postgres_port_i, _ := strconv.ParseInt(postgres_port, 10, 32)
 
 	postgres_user := os.Getenv("POSTGRES_USER")
 	if postgres_user == "" {
@@ -67,6 +74,7 @@ func GetEnvironment() (Environment, error) {
 		TelegramBotToken: token,
 		TelegramChatId:   chat_id,
 		PostgresIP:       postgres_ip,
+		PostgresPort:     int(postgres_port_i),
 		PostgresUser:     postgres_user,
 		PostgresPassword: postgres_password,
 		PostgresDB:       postgres_db,
