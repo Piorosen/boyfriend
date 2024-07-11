@@ -98,7 +98,7 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 		name := ""
 		if telegramId == int(item.UserId) {
 			name = "Jinju"
-		} else {
+		} else if item.UserId == 0 {
 			name = "ChaCha"
 		}
 		text += fmt.Sprintf("(%s) %s : %s\n", item.CreatedAt.Format("15:04:05"), name, item.Text)
