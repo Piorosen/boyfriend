@@ -159,24 +159,19 @@ func (client *Client) Process(text string, env Environment) string {
 	if len(text) == 0 {
 		return ""
 	}
+	if text[1] == '!' {
+		// jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
+		message := client.GetText(env.PreviousTextSize)
+		result, err := MakeChat(message, env.GeminiApiKey, env.TelegramJubuId)
+		if err != nil {
+			return err.Error()
+		} else {
+			return result
+		}
+	}
+
 	if text[0] == '/' {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
-		case "chat":
-			// jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
-			message := client.GetText(env.PreviousTextSize)
-			result, err := MakeChat(message, env.GeminiApiKey, env.TelegramJubuId)
-			if err != nil {
-				return err.Error()
-			} else {
-				// client.Insert("차차핑-봇",
-				// 	"차차핑-봇",
-				// 	"차차핑-봇",
-				// 	result,
-				// 	int64(0),
-				// 	int64(0),
-				// )
-				return result
-			}
 		case "on":
 			client.mode = true
 			return "데이터 수집을 재개 합니다."
