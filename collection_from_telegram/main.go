@@ -49,7 +49,7 @@ func main() {
 						err = client.Insert(update.Message.From.FirstName,
 							update.Message.From.LastName,
 							update.Message.From.UserName,
-							update.Message.Text,
+							update.Message.Text[1:],
 							int64(update.Message.MessageID),
 							update.Message.From.ID,
 						)
