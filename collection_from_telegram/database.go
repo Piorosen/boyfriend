@@ -159,7 +159,7 @@ func (client *Client) Process(text string, env Environment) string {
 	if len(text) == 0 {
 		return ""
 	}
-	if text[1] == '!' {
+	if text[0] == '!' {
 		// jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
 		message := client.GetText(env.PreviousTextSize)
 		result, err := MakeChat(message, env.GeminiApiKey, env.TelegramJubuId)
