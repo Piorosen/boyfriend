@@ -92,7 +92,7 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 	}
 
 	prompt := SYSTEM_PROMPT
-	text := ""
+	text := "Previouse Text is below.\n\n"
 
 	for _, item := range reverseArray(messages) {
 		name := ""
