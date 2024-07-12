@@ -108,6 +108,24 @@ func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (st
 			return "", err
 		}
 		model = client.GenerativeModel("gemini-1.5-flash")
+		model.SafetySettings = []*genai.SafetySetting{
+			{
+				Category:  genai.HarmCategoryHateSpeech,
+				Threshold: genai.HarmBlockNone,
+			},
+			{
+				Category:  genai.HarmCategorySexuallyExplicit,
+				Threshold: genai.HarmBlockNone,
+			},
+			{
+				Category:  genai.HarmCategoryHarassment,
+				Threshold: genai.HarmBlockNone,
+			},
+			{
+				Category:  genai.HarmCategoryDangerousContent,
+				Threshold: genai.HarmBlockNone,
+			},
+		}
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{
 				genai.Text(SYSTEM_PROMPT),
