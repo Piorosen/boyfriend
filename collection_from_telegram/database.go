@@ -45,8 +45,6 @@ func (client *Client) Process(text string, user_id int64, env Environment) strin
 
 	if text[0] == '/' {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
-		case "help":
-			return "clear\nhistory\nversion\n"
 		case "get_instruction":
 			return GetSystemInstruction()
 		case "set_instrctuin":
@@ -67,8 +65,9 @@ func (client *Client) Process(text string, user_id int64, env Environment) strin
 			} else {
 				return fmt.Sprintf("아래의 명령어를 사용하시면 데이터베이스에 있는 모든 기록을 삭제합니다.\n/clear %s", ALL_DATA_REMOVE)
 			}
+		// case "help":
 		default:
-			return ""
+			return "clear\nhistory\nversion\nget_instruction\nset_instruction"
 		}
 	}
 	return ""
