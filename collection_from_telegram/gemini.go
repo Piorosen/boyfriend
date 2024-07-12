@@ -130,7 +130,8 @@ func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (st
 
 	resp, err := cs.SendMessage(ctx, prompts...)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err.Error())
+		return "", err
 	}
 
 	result := ""

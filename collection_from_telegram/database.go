@@ -37,7 +37,7 @@ func (client *Client) Process(text string, user_id int64, env Environment) strin
 		// message := client.GetText(1)
 		result, err := MakeChat(text[1:], user_id, env.GeminiApiKey, env.TelegramJubuId)
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("Error From Gemini : %v", err)
 		} else {
 			return result
 		}

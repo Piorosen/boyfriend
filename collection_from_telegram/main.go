@@ -44,7 +44,7 @@ func main() {
 					output := client.Process(update.Message.Text, update.Message.From.ID, env)
 					if output != "" {
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
-						msg.ReplyToMessageID = update.Message.MessageID
+						// msg.ReplyToMessageID = update.Message.MessageID
 						bot.Send(msg)
 					}
 					if err != nil {
