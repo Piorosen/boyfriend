@@ -81,7 +81,7 @@ Example Dialogue:
 // 1. Cute and C++ Style: ChaCha’s sentences should be as cute as possible, incorporating elements of C++ language style.
 
 func GetSystemInstruction() string {
-	return SYSTEM_PROMPT
+	return "```love_jubu\n" + SYSTEM_PROMPT + "```"
 }
 
 func SetSystemInstruction(data string) {
