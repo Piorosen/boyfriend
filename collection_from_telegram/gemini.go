@@ -80,11 +80,12 @@ Example Dialogue:
 // 1. Jinju Adoration: ChaCha has a deep love and adoration for Jinju.
 // 1. Cute and C++ Style: ChaCha’s sentences should be as cute as possible, incorporating elements of C++ language style.
 
-func reverseArray(arr []Message) []Message {
-	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
-		arr[i], arr[j] = arr[j], arr[i]
-	}
-	return arr
+func GetSystemInstruction() string {
+	return SYSTEM_PROMPT
+}
+
+func SetSystemInstruction(data string) {
+	SYSTEM_PROMPT = data
 }
 
 func GetChatHistoryFromGemini() string {
@@ -96,7 +97,7 @@ func GetChatHistoryFromGemini() string {
 }
 
 func ClearChatHistory() {
-	cs.History = nil
+	cs.History = []*genai.Content{}
 }
 
 func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (string, error) {
@@ -106,7 +107,7 @@ func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (st
 		if err != nil {
 			return "", err
 		}
-		model = client.GenerativeModel("gemini-1.0-pro")
+		model = client.GenerativeModel("gemini-1.5-flash")
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{
 				genai.Text(SYSTEM_PROMPT),
@@ -120,9 +121,9 @@ func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (st
 	if telegramId == int(user_id) {
 		name = "Jinju"
 	} else {
-		name = "Others"
+		name = "Other"
 	}
-	text := fmt.Sprintf("(%s) %s : %s\n", time.Now().Add(time.Hour*9).Format("15:04:05"), name, messages)
+	text := fmt.Sprintf("(%s) %s : %s\n", time.Now().UTC().Add(time.Hour*9).Format("15:04:05"), name, messages)
 	prompts := []genai.Part{
 		genai.Text(text),
 	}
@@ -136,7 +137,7 @@ func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (st
 	for _, cad := range resp.Candidates {
 		if cad.Content != nil {
 			for _, part := range cad.Content.Parts {
-				result += fmt.Sprint(part) + "Other Candidate : \n\n"
+				result += fmt.Sprint(part) + "\n"
 			}
 		}
 	}

@@ -1,25 +1,25 @@
 version: '3.7'
 
 services:
-  telegram_bot_db:
-    image: postgres:16.3-alpine3.19
-    restart: always
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      TZ: "Asia/Seoul"
-    networks:
-      - backend
-    ports:
-      - "39502:5432"
+  # telegram_bot_db:
+  #   image: postgres:16.3-alpine3.19
+  #   restart: always
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     TZ: "Asia/Seoul"
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - "39502:5432"
 
   telegram_bot:
-    image: ghcr.io/piorosen/colllection-telegram:1.2.0
-    # build: 
-      # context: '.'
+    # image: ghcr.io/piorosen/colllection-telegram:1.2.0
+    build: 
+      context: '.'
     restart: unless-stopped
     environment:
       TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}

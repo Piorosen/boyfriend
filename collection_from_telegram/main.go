@@ -19,10 +19,6 @@ func main() {
 		log.Fatal(err)
 	}
 	client := NewClient()
-	err = client.Connect(env.PostgresIP, env.PostgresPort, env.PostgresDB, env.PostgresUser, env.PostgresPassword)
-	if err != nil {
-		log.Panic(err)
-	}
 
 	bot, err := tgbotapi.NewBotAPI(env.TelegramBotToken)
 	if err != nil {
@@ -50,14 +46,6 @@ func main() {
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, output)
 						msg.ReplyToMessageID = update.Message.MessageID
 						bot.Send(msg)
-					} else if client.Run() {
-						err = client.Insert(update.Message.From.FirstName,
-							update.Message.From.LastName,
-							update.Message.From.UserName,
-							update.Message.Text,
-							int64(update.Message.MessageID),
-							update.Message.From.ID,
-						)
 					}
 					if err != nil {
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
