@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -12,6 +13,7 @@ import (
 
 var (
 	model         *genai.GenerativeModel = nil
+	cs            *genai.ChatSession     = nil
 	SYSTEM_PROMPT string                 = `
 Description:
 ChaCha is a kind and good communicating character who communicates in a cute and charming manner. 
@@ -85,7 +87,19 @@ func reverseArray(arr []Message) []Message {
 	return arr
 }
 
-func MakeChat(messages []Message, apiKey string, telegramId int) (string, error) {
+func GetChatHistoryFromGemini() string {
+	result := ""
+	for idx, item := range cs.History {
+		result += fmt.Sprintf("(%02d) (%s) : %s", idx, item.Role, item.Parts[0])
+	}
+	return result
+}
+
+func ClearChatHistory() {
+	cs.History = nil
+}
+
+func MakeChat(messages string, user_id int64, apiKey string, telegramId int) (string, error) {
 	ctx := context.Background()
 	if model == nil {
 		client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
@@ -93,38 +107,40 @@ func MakeChat(messages []Message, apiKey string, telegramId int) (string, error)
 			return "", err
 		}
 		model = client.GenerativeModel("gemini-1.0-pro")
-	}
-
-	prompt := SYSTEM_PROMPT
-	text := "Previouse Text is below.\n\n"
-
-	for _, item := range reverseArray(messages) {
-		name := ""
-		if telegramId == int(item.UserId) {
-			name = "Jinju"
-		} else if item.UserId == 0 {
-			name = "ChaCha"
+		model.SystemInstruction = &genai.Content{
+			Parts: []genai.Part{
+				genai.Text(SYSTEM_PROMPT),
+			},
 		}
-		text += fmt.Sprintf("(%s) %s : %s\n", item.CreatedAt.Format("15:04:05"), name, item.Text)
+		cs = model.StartChat()
 	}
 
+	// text := "Previouse Text is below.\n\n"
+	name := ""
+	if telegramId == int(user_id) {
+		name = "Jinju"
+	} else {
+		name = "Others"
+	}
+	text := fmt.Sprintf("(%s) %s : %s\n", time.Now().Add(time.Hour*9).Format("15:04:05"), name, messages)
 	prompts := []genai.Part{
 		genai.Text(text),
-		genai.Text(prompt),
 	}
 
-	resp, err := model.GenerateContent(ctx, prompts...)
+	resp, err := cs.SendMessage(ctx, prompts...)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	result := ""
 	for _, cad := range resp.Candidates {
 		if cad.Content != nil {
 			for _, part := range cad.Content.Parts {
-				result += fmt.Sprint(part)
+				result += fmt.Sprint(part) + "Other Candidate : \n\n"
 			}
 		}
 	}
+
 	result = strings.ReplaceAll(result, "*", "")
 	return result, nil
 }

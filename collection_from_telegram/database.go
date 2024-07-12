@@ -155,30 +155,30 @@ func (client *Client) Run() bool {
 	return client.mode
 }
 
-func (client *Client) Process(text string, env Environment) string {
+func (client *Client) Process(text string, user_id int64, env Environment) string {
 	if len(text) == 0 {
 		return ""
 	}
 	if text[0] == '!' {
 		// jsonData := fmt.Sprintf(`{"size": %d, "jubu_id": %d}`, 100, env.TelegramJubuId)
-		message := client.GetText(env.PreviousTextSize)
-		result, err := MakeChat(message, env.GeminiApiKey, env.TelegramJubuId)
+		// message := client.GetText(1)
+		result, err := MakeChat(text[1:], user_id, env.GeminiApiKey, env.TelegramJubuId)
 		if err != nil {
 			return err.Error()
 		} else {
-			client.Insert("차차핑-봇",
-				"차차핑-봇",
-				"차차핑-봇",
-				result,
-				int64(0),
-				int64(0),
-			)
 			return result
 		}
 	}
 
 	if text[0] == '/' {
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
+		case "help":
+			return "genai_clear\ngenai_history\nDeprecated:\non\noff\nclear\ncount"
+		case "genai_clear":
+			ClearChatHistory()
+			return "Success Removal Data from Genmini Chat history"
+		case "genai_history":
+			return GetChatHistoryFromGemini()
 		case "on":
 			client.mode = true
 			return "데이터 수집을 재개 합니다."
