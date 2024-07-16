@@ -47,8 +47,11 @@ func (client *Client) Process(text string, user_id int64, env Environment) strin
 		switch strings.Split(strings.ToLower(text[1:]), " ")[0] {
 		case "get_instruction":
 			return GetSystemInstruction()
-		case "set_instrctuin":
-			SetSystemInstruction(text[len("/set_instrctuin "):])
+		case "set_instruction":
+			SetSystemInstruction(text[len("/set_instruction "):])
+			return GetSystemInstruction()
+		case "clear_instruction":
+			ClearSystemInstruction()
 			return GetSystemInstruction()
 		case "history":
 			return GetChatHistoryFromGemini()
@@ -67,7 +70,7 @@ func (client *Client) Process(text string, user_id int64, env Environment) strin
 			}
 		// case "help":
 		default:
-			return "clear\nhistory\nversion\nget_instruction\nset_instruction"
+			return "clear\nhistory\nversion\nget_instruction\nset_instruction\nclear_instruction"
 		}
 	}
 	return ""

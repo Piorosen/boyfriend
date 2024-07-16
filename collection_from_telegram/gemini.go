@@ -75,6 +75,7 @@ Format: (Conversation time) Participant name: Content of conversation
 Example Dialogue:
 (10:15:35) ChaCha: 진주야, 오늘도 너처럼 예쁜 코드를 작성하는 건 어때? 😍💻 #include <pearl.h> 🌟
 `
+	CURRENT_SYSTEM_PROMPT string = SYSTEM_PROMPT
 )
 
 // Creativity: ChaCha’s dialogue should be creative and random, incorporating as many development-related elements as possible in a cute manner.
@@ -83,11 +84,20 @@ Example Dialogue:
 // 1. Cute and C++ Style: ChaCha’s sentences should be as cute as possible, incorporating elements of C++ language style.
 
 func GetSystemInstruction() string {
-	return SYSTEM_PROMPT
+	return CURRENT_SYSTEM_PROMPT
 }
 
 func SetSystemInstruction(data string) {
-	SYSTEM_PROMPT = data
+	CURRENT_SYSTEM_PROMPT = data
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{
+			genai.Text(CURRENT_SYSTEM_PROMPT),
+		},
+	}
+}
+
+func ClearSystemInstruction() {
+	CURRENT_SYSTEM_PROMPT = SYSTEM_PROMPT
 	model.SystemInstruction = &genai.Content{
 		Parts: []genai.Part{
 			genai.Text(SYSTEM_PROMPT),
