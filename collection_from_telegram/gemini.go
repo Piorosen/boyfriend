@@ -83,11 +83,16 @@ Example Dialogue:
 // 1. Cute and C++ Style: ChaCha’s sentences should be as cute as possible, incorporating elements of C++ language style.
 
 func GetSystemInstruction() string {
-	return "```love_jubu\n" + SYSTEM_PROMPT + "```"
+	return SYSTEM_PROMPT
 }
 
 func SetSystemInstruction(data string) {
 	SYSTEM_PROMPT = data
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{
+			genai.Text(SYSTEM_PROMPT),
+		},
+	}
 }
 
 func GetChatHistoryFromGemini() string {
